@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "6465610493989004421"
+      "templateHash": "3405025433324380866"
     }
   },
   "parameters": {
@@ -17,9 +17,6 @@
       "type": "string",
       "defaultValue": "[uniqueString('stzurebiceppoc')]"
     },
-    "location": {
-      "type": "string"
-    },
     "teamsUsername": {
       "type": "string"
     },
@@ -28,6 +25,9 @@
     },
     "appClientSecret": {
       "type": "secureString"
+    },
+    "location": {
+      "type": "string"
     }
   },
   "resources": [
@@ -50,9 +50,6 @@
         "parameters": {
           "name": {
             "value": "[parameters('storageName')]"
-          },
-          "location": {
-            "value": "[parameters('location')]"
           }
         },
         "template": {
@@ -62,7 +59,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "11941021378539120344"
+              "templateHash": "14428787089130855099"
             }
           },
           "parameters": {
@@ -70,10 +67,6 @@
               "type": "string",
               "maxLength": 59,
               "minLength": 1
-            },
-            "location": {
-              "type": "string",
-              "defaultValue": "[resourceGroup().location]"
             }
           },
           "resources": [
@@ -81,7 +74,7 @@
               "type": "Microsoft.Storage/storageAccounts",
               "apiVersion": "2019-06-01",
               "name": "[parameters('name')]",
-              "location": "[parameters('location')]",
+              "location": "[resourceGroup().location]",
               "kind": "StorageV2",
               "sku": {
                 "name": "Standard_LRS"
@@ -123,9 +116,6 @@
           },
           "clientSecret": {
             "value": "[parameters('appClientSecret')]"
-          },
-          "location": {
-            "value": "[parameters('location')]"
           }
         },
         "template": {
@@ -135,7 +125,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "5500010087681646575"
+              "templateHash": "18265749929407490157"
             }
           },
           "parameters": {
@@ -147,10 +137,6 @@
             },
             "clientSecret": {
               "type": "secureString"
-            },
-            "location": {
-              "type": "string",
-              "defaultValue": "[resourceGroup().location]"
             }
           },
           "resources": [
@@ -158,7 +144,7 @@
               "type": "Microsoft.Resources/deploymentScripts",
               "apiVersion": "2020-10-01",
               "name": "testScript",
-              "location": "[parameters('location')]",
+              "location": "[resourceGroup().location]",
               "kind": "AzurePowerShell",
               "properties": {
                 "azPowerShellVersion": "5.1",
