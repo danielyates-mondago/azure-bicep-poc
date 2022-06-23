@@ -1,4 +1,3 @@
-param rgName string = 'rgazurebiceppoc'
 param storageName string = uniqueString('stzurebiceppoc')
 
 param teamsUsername string

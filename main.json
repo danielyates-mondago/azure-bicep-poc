@@ -5,14 +5,10 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "2449214652885421918"
+      "templateHash": "3096924111978616068"
     }
   },
   "parameters": {
-    "rgName": {
-      "type": "string",
-      "defaultValue": "rgazurebiceppoc"
-    },
     "storageName": {
       "type": "string",
       "defaultValue": "[uniqueString('stzurebiceppoc')]"
