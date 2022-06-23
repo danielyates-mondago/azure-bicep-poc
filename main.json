@@ -1,11 +1,11 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "3405025433324380866"
+      "templateHash": "2449214652885421918"
     }
   },
   "parameters": {
@@ -27,21 +27,15 @@
       "type": "secureString"
     },
     "location": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
     }
   },
   "resources": [
     {
-      "type": "Microsoft.Resources/resourceGroups",
-      "apiVersion": "2021-01-01",
-      "name": "[parameters('rgName')]",
-      "location": "[parameters('location')]"
-    },
-    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
       "name": "storageCreation",
-      "resourceGroup": "[parameters('rgName')]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -50,6 +44,9 @@
         "parameters": {
           "name": {
             "value": "[parameters('storageName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
           }
         },
         "template": {
@@ -59,7 +56,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "14428787089130855099"
+              "templateHash": "11941021378539120344"
             }
           },
           "parameters": {
@@ -67,6 +64,10 @@
               "type": "string",
               "maxLength": 59,
               "minLength": 1
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
             }
           },
           "resources": [
@@ -74,7 +75,7 @@
               "type": "Microsoft.Storage/storageAccounts",
               "apiVersion": "2019-06-01",
               "name": "[parameters('name')]",
-              "location": "[resourceGroup().location]",
+              "location": "[parameters('location')]",
               "kind": "StorageV2",
               "sku": {
                 "name": "Standard_LRS"
@@ -92,16 +93,12 @@
             }
           }
         }
-      },
-      "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
       "name": "connectTeams",
-      "resourceGroup": "[parameters('rgName')]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -116,6 +113,9 @@
           },
           "clientSecret": {
             "value": "[parameters('appClientSecret')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
           }
         },
         "template": {
@@ -125,7 +125,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "18265749929407490157"
+              "templateHash": "5500010087681646575"
             }
           },
           "parameters": {
@@ -137,6 +137,10 @@
             },
             "clientSecret": {
               "type": "secureString"
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
             }
           },
           "resources": [
@@ -144,7 +148,7 @@
               "type": "Microsoft.Resources/deploymentScripts",
               "apiVersion": "2020-10-01",
               "name": "testScript",
-              "location": "[resourceGroup().location]",
+              "location": "[parameters('location')]",
               "kind": "AzurePowerShell",
               "properties": {
                 "azPowerShellVersion": "5.1",
@@ -155,16 +159,13 @@
             }
           ]
         }
-      },
-      "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]"
-      ]
+      }
     }
   ],
   "outputs": {
     "storageAccountId": {
       "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', 'storageCreation')).outputs.storageAccountId.value]"
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'storageCreation')).outputs.storageAccountId.value]"
     }
   }
 }

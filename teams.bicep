@@ -6,9 +6,11 @@ param password string
 @secure()
 param clientSecret string
 
+param location string = resourceGroup().location
+
 resource test_script 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'testScript'
-  location: resourceGroup().location
+  location: location
   kind: 'AzurePowerShell'
   properties: {
     azPowerShellVersion: '5.1'
