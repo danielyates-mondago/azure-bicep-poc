@@ -1,0 +1,184 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.7.4.23292",
+      "templateHash": "6465610493989004421"
+    }
+  },
+  "parameters": {
+    "rgName": {
+      "type": "string",
+      "defaultValue": "rgazurebiceppoc"
+    },
+    "storageName": {
+      "type": "string",
+      "defaultValue": "[uniqueString('stzurebiceppoc')]"
+    },
+    "location": {
+      "type": "string"
+    },
+    "teamsUsername": {
+      "type": "string"
+    },
+    "teamsPassword": {
+      "type": "secureString"
+    },
+    "appClientSecret": {
+      "type": "secureString"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2021-01-01",
+      "name": "[parameters('rgName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "storageCreation",
+      "resourceGroup": "[parameters('rgName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('storageName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.7.4.23292",
+              "templateHash": "11941021378539120344"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "maxLength": 59,
+              "minLength": 1
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2019-06-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "kind": "StorageV2",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "properties": {
+                "accessTier": "Hot",
+                "supportsHttpsTrafficOnly": true
+              }
+            }
+          ],
+          "outputs": {
+            "storageAccountId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "connectTeams",
+      "resourceGroup": "[parameters('rgName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "username": {
+            "value": "[parameters('teamsUsername')]"
+          },
+          "password": {
+            "value": "[parameters('teamsPassword')]"
+          },
+          "clientSecret": {
+            "value": "[parameters('appClientSecret')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.7.4.23292",
+              "templateHash": "5500010087681646575"
+            }
+          },
+          "parameters": {
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "secureString"
+            },
+            "clientSecret": {
+              "type": "secureString"
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deploymentScripts",
+              "apiVersion": "2020-10-01",
+              "name": "testScript",
+              "location": "[parameters('location')]",
+              "kind": "AzurePowerShell",
+              "properties": {
+                "azPowerShellVersion": "5.1",
+                "retentionInterval": "P1D",
+                "arguments": "[format('-username ''{0}'' -password ''{1}'' -clientSecret ''{2}''', parameters('username'), parameters('password'), parameters('clientSecret'))]",
+                "scriptContent": "param($username, $password, $clientSecret)\r\n      Install-Module -Name PowerShellGet -Force -AllowClobber\r\n      Install-Module -Name MicrosoftTeams -Force -AllowClobber\r\n      Import-Module MicrosoftTeams\r\n\r\n      $tenantName = \"mondagoteams.onmicrosoft.com\"  \r\n      $clientId = \"5f038925-e641-441e-974f-e2f077e153b2\"\r\n\r\n      $uri = \"https://login.microsoftonline.com/$tenantName/oauth2/v2.0/token\"\r\n\r\n      $body = @{  \r\n        Grant_Type    = \"password\";\r\n        #Grant_Type    = \"client_credentials\";\r\n        Scope         = \"https://graph.microsoft.com/.default\"  \r\n        Client_Id     = $clientId;\r\n        Client_Secret = $clientSecret;\r\n        Username      = $username; \r\n        Password      = $password;\r\n      }   \r\n      $graphTokenResponse = Invoke-RestMethod -Method POST -Uri $uri -Body $body\r\n      $graphToken = $graphTokenResponse.access_token\r\n\r\n      $body = @{  \r\n        Grant_Type    = \"password\"  # client_credentials\r\n        #Grant_Type    = \"client_credentials\"\r\n        Scope         = \"48ac35b8-9aa8-4d74-927d-1f4a14a0b239/.default\"\r\n        Client_Id     = $clientId  \r\n        Client_Secret = $clientSecret  \r\n        Username      = $username  \r\n        Password      = $password  \r\n      }   \r\n      $teamsTokenResponse = Invoke-RestMethod -Method POST -Uri $uri -Body $body\r\n      $teamsToken = $teamsTokenResponse.access_token\r\n\r\n      Connect-MicrosoftTeams -AccessTokens @($graphToken, $teamsToken)\r\n      Get-CsTeamsComplianceRecordingPolicy\r\n      Disconnect-MicrosoftTeams\r\n    "
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "storageAccountId": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', 'storageCreation')).outputs.storageAccountId.value]"
+    }
+  }
+}
