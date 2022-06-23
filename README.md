@@ -1,1 +1,1 @@
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdanielyates-mondago%2Farm-bicep-poc%2Fmaster%2Fmain.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdanielyates-mondago%2Fazure-bicep-poc%2Fmaster%2Fmain.json)
